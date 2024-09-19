@@ -1,0 +1,6 @@
+PyQt5
+langchain
+langchain-community
+psutil
+GPUtil
+setuptools
