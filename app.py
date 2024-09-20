@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QLineEdit,
     QPushButton, QHBoxLayout, QLabel, QScrollArea, QDesktopWidget,
     QMainWindow, QAction, QMenu, QDialog, QFormLayout, QDoubleSpinBox,
-    QSpinBox, QComboBox, QCheckBox, QTabWidget, QSizePolicy, QSlider,
+    QSpinBox, QComboBox, QCheckBox, QTabWidget, QSizePolicy, QFrame,
     QFileDialog, QInputDialog, QMessageBox, QDialogButtonBox, QTextEdit
 )
 from PyQt5.QtGui import QFont, QPalette, QColor, QTextCursor
@@ -28,6 +28,9 @@ import winreg
 # Set up logging
 logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Set environment variable for CUDA
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"  # Replace with desired GPU ID
+
 # Global variables for settings
 CONFIG_DIR = appdirs.user_config_dir("OllamaChatbot")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
@@ -51,7 +54,6 @@ DEFAULT_SETTINGS = {
     "vocab_only": False,
     "font_size": 12,
     "theme": "Light",
-    "chat_bubble_color": "Blue",
     "max_tokens": 2048,
     "stop_sequences": "",
     "presence_penalty": 0.0,
@@ -172,10 +174,11 @@ class MessageWidget(QWidget):
         self.text.setFont(QFont('SF Pro Text', 13))
         self.text.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.text.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.text.setFrameStyle(QFrame.NoFrame)
         
-        self.text.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.text.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
         
-        self.text.textChanged.connect(self.adjust_size)
+        self.text.document().contentsChanged.connect(self.adjust_size)
 
         if is_user:
             self.text.setStyleSheet("""
@@ -183,7 +186,7 @@ class MessageWidget(QWidget):
                     background-color: #F0F8FF;
                     border: none;
                     border-radius: 18px;
-                    padding: 10px 15px;
+                    padding: 15px 20px;  /* Increased padding */
                     color: #333333;
                 }
             """)
@@ -193,7 +196,7 @@ class MessageWidget(QWidget):
                     background-color: #D8E4FF;
                     border: none;
                     border-radius: 18px;
-                    padding: 10px 15px;
+                    padding: 15px 20px;  /* Increased padding */
                     color: #333333;
                 }
             """)
@@ -239,16 +242,25 @@ class MessageWidget(QWidget):
         self.adjust_size()
 
     def adjust_size(self):
-        doc_size = self.text.document().size().toSize()
-        max_width = min(int(self.chat_app.width() * 0.5) if self.chat_app else 700, 700)
-        min_width = max(int(self.chat_app.width() * 0.2) if self.chat_app else 300, 300)
-        new_width = max(min(doc_size.width() + 60, max_width), min_width)
-        new_height = max(doc_size.height() + 40, 50)
+        doc = self.text.document()
+        doc.setTextWidth(self.text.viewport().width())
+        doc_height = doc.size().height()
         
-        self.text.setMinimumSize(new_width, new_height)
-        self.text.setMaximumSize(new_width, new_height)
-        self.setMinimumSize(new_width + 100, new_height + 20)
-        self.setMaximumSize(new_width + 100, new_height + 20)
+        max_width = min(int(self.chat_app.width() * 0.9) if self.chat_app else 900, 900)  # Increased max_width
+        min_width = max(int(self.chat_app.width() * 0.2) if self.chat_app else 300, 300)
+        
+        new_width = max(min(int(doc.idealWidth()) + 50, max_width), min_width)  # Adjusted width calculation, added more padding
+        new_height = int(doc_height) + 40  # Adjusted height calculation
+        
+        self.text.setMinimumWidth(min_width)
+        self.text.setMaximumWidth(max_width)
+        self.text.setFixedHeight(new_height)
+        self.setFixedHeight(new_height + 20)  # Increased height of the container
+
+        # Force layout update
+        self.updateGeometry()
+        if self.parent():
+            self.parent().updateGeometry()
 
     def toggle_edit_mode(self):
         try:
@@ -306,6 +318,29 @@ class MessageWidget(QWidget):
             logging.error(f"Error toggling edit mode: {str(e)}")
             QMessageBox.warning(self, "Error", f"Failed to edit message: {str(e)}")
 
+
+class CustomTextEdit(QTextEdit):
+    def __init__(self, parent=None, chat_app=None):
+        super().__init__(parent)
+        self.chat_app = chat_app  # Store a reference to the ChatbotApp instance
+        self.setFixedHeight(100)  # Set a fixed height for the text edit
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)  # Ensure it behaves like a single-line input
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)  # Always show the vertical scrollbar
+
+    def keyPressEvent(self, event):
+        if event.key() in (Qt.Key_Return, Qt.Key_Enter):
+            if event.modifiers() == Qt.ShiftModifier:
+                # Insert a new line
+                cursor = self.textCursor()
+                cursor.insertText('\n')
+                self.setTextCursor(cursor)
+            else:
+                if self.chat_app:
+                    self.chat_app.sendMessage()
+                event.accept()
+                return
+        else:
+            super().keyPressEvent(event)
 
 class SettingsDialog(QDialog):
     def __init__(self, parent=None):
@@ -408,12 +443,8 @@ class SettingsDialog(QDialog):
             self.theme = QComboBox()
             self.theme.addItems(["Light", "Dark", "System"])
 
-            self.chat_bubble_color = QComboBox()
-            self.chat_bubble_color.addItems(["Blue", "Green", "Gray"])
-
             self.ui_layout.addRow("Font Size:", self.font_size)
             self.ui_layout.addRow("Theme:", self.theme)
-            self.ui_layout.addRow("Chat Bubble Color:", self.chat_bubble_color)
 
             # Advanced Settings Tab
             self.advanced_tab = QWidget()
@@ -457,13 +488,17 @@ class SettingsDialog(QDialog):
             self.memory_layout.addRow("Memory Type:", self.memory_type)
             self.memory_layout.addRow("Memory K:", self.memory_k)
 
+            # System Prompt
+            self.system_prompt = QTextEdit()
+            self.system_prompt.setPlaceholderText("Enter system prompt here...")
+            self.model_layout.addRow("System Prompt:", self.system_prompt)
+
             # Save Button
             self.save_button = QPushButton("Save")
             self.save_button.clicked.connect(self.accept)
             self.layout.addWidget(self.save_button)
             self.load_settings_to_ui()
 
-        
         except Exception as e:
             logging.error(f"Error in SettingsDialog: {str(e)}")
 
@@ -485,13 +520,13 @@ class SettingsDialog(QDialog):
         self.vocab_only.setChecked(SETTINGS['vocab_only'])
         self.font_size.setValue(SETTINGS['font_size'])
         self.theme.setCurrentText(SETTINGS['theme'])
-        self.chat_bubble_color.setCurrentText(SETTINGS['chat_bubble_color'])
         self.max_tokens.setValue(SETTINGS['max_tokens'])
         self.stop_sequences.setText(SETTINGS['stop_sequences'])
         self.presence_penalty.setValue(SETTINGS['presence_penalty'])
         self.frequency_penalty.setValue(SETTINGS['frequency_penalty'])
         self.memory_type.setCurrentText(SETTINGS['memory_type'])
         self.memory_k.setValue(SETTINGS['memory_k'])
+        self.system_prompt.setPlainText(SETTINGS.get('system_prompt', ''))
 
     def accept(self):
         # Update global settings
@@ -515,13 +550,13 @@ class SettingsDialog(QDialog):
             'vocab_only': self.vocab_only.isChecked(),
             'font_size': self.font_size.value(),
             'theme': self.theme.currentText(),
-            'chat_bubble_color': self.chat_bubble_color.currentText(),
             'max_tokens': self.max_tokens.value(),
             'stop_sequences': self.stop_sequences.text(),
             'presence_penalty': self.presence_penalty.value(),
             'frequency_penalty': self.frequency_penalty.value(),
             'memory_type': self.memory_type.currentText(),
-            'memory_k': self.memory_k.value()
+            'memory_k': self.memory_k.value(),
+            'system_prompt': self.system_prompt.toPlainText()
         })
         save_settings(SETTINGS)
         super().accept()
@@ -534,7 +569,7 @@ class ChatbotApp(QMainWindow):
             self.llm = None  # Initialize llm as None
             self.memory = CustomConversationBufferMemory()
             self.prompt_template = ChatPromptTemplate.from_messages([
-                ("system", "You are a helpful AI assistant."),
+                ("system", SETTINGS.get('system_prompt', "You are a helpful AI assistant.")),
                 ("human", "{input}"),
                 ("ai", "{output}"),
             ])
@@ -545,6 +580,7 @@ class ChatbotApp(QMainWindow):
         except Exception as e:
             logging.error(f"Error in ChatbotApp initialization: {str(e)}")
             QMessageBox.critical(self, "Error", f"Failed to initialize the application: {str(e)}")
+
 
     def apply_settings(self):
         try:
@@ -558,9 +594,7 @@ class ChatbotApp(QMainWindow):
                 self.toggle_light_mode()
             elif SETTINGS['theme'] == 'System':
                 self.apply_system_theme()
-            
-            # Apply chat bubble color
-            self.update_chat_bubble_color(SETTINGS['chat_bubble_color'])
+        
             
             # Update LLM settings
             self.change_model()
@@ -587,6 +621,34 @@ class ChatbotApp(QMainWindow):
             logging.error(f"Error applying settings: {str(e)}")
             QMessageBox.critical(self, "Error", f"Failed to apply settings: {str(e)}")
 
+    def change_model(self):
+        try:
+            self.llm = ChatOllama(
+                model=SETTINGS['model'],
+                temperature=SETTINGS['temperature'],
+                num_ctx=SETTINGS['num_ctx'],
+                num_gpu=SETTINGS['num_gpu'],
+                num_thread=SETTINGS['num_thread'],
+                top_k=SETTINGS['top_k'],
+                top_p=SETTINGS['top_p'],
+                repeat_penalty=SETTINGS['repeat_penalty'],
+                repeat_last_n=SETTINGS['repeat_last_n'],
+                seed=SETTINGS['seed'],
+                mirostat=SETTINGS['mirostat'],
+                mirostat_tau=SETTINGS['mirostat_tau'],
+                mirostat_eta=SETTINGS['mirostat_eta'],
+                f16_kv=SETTINGS['f16_kv'],
+                logits_all=SETTINGS['logits_all'],
+                vocab_only=SETTINGS['vocab_only'],
+                streaming=True,
+                callbacks=[self.stream_handler],
+            )
+            self.add_system_message(f"The {SETTINGS['model']} model is loaded")
+        except Exception as e:
+            logging.error(f"Error changing model: {str(e)}")
+            QMessageBox.critical(self, "Error", f"Failed to change model: {str(e)}")
+            self.llm = None
+
     def update_memory_settings(self):
         memory_type = SETTINGS['memory_type']
         memory_k = SETTINGS['memory_k']
@@ -602,31 +664,6 @@ class ChatbotApp(QMainWindow):
         for message in self.memory.chat_memory.messages:
             self.memory.chat_memory.add_message(message)
 
-    def update_chat_bubble_color(self, color):
-        for i in range(self.chat_layout.count()):
-            widget = self.chat_layout.itemAt(i).widget()
-            if isinstance(widget, MessageWidget):
-                if widget.is_user:
-                    widget.text.setStyleSheet(f"""
-                        QTextEdit {{
-                            background-color: {color};
-                            border: none;
-                            border-radius: 18px;
-                            padding: 10px 15px;
-                            color: #333333;
-                        }}
-                    """)
-                else:
-                    widget.text.setStyleSheet(f"""
-                        QTextEdit {{
-                            background-color: {color};
-                            border: none;
-                            border-radius: 18px;
-                            padding: 10px 15px;
-                            color: #333333;
-                        }}
-
-                    """)
     def update_memory_settings(self):
         memory_type = SETTINGS['memory_type']
         memory_k = SETTINGS['memory_k']
@@ -730,7 +767,6 @@ class ChatbotApp(QMainWindow):
                 QMenu {
                     background-color: #34495e;
                     color: white;
-                    border: 1px solid #2c3e50;
                 }
                 QMenu::item {
                     padding: 5px 30px 5px 20px;
@@ -805,7 +841,6 @@ class ChatbotApp(QMainWindow):
             self.chat_area = QScrollArea()
             self.chat_area.setStyleSheet("""
             QScrollArea {
-                border: 1px solid #ddd;
                 border-radius: 10px;
                 background-color: #f9f9f9;
             }
@@ -833,11 +868,10 @@ class ChatbotApp(QMainWindow):
             
             input_layout = QHBoxLayout()
             
-            self.inputField = QLineEdit()
+            self.inputField = CustomTextEdit(self, chat_app=self)  # Pass the chat_app reference
             # Enhanced style for the input field
             self.inputField.setStyleSheet("""
                 QLineEdit {
-                    border: 2px solid #3498db;
                     border-radius: 10px;
                     padding: 5px 10px;
                     background-color: #ecf0f1;
@@ -845,13 +879,11 @@ class ChatbotApp(QMainWindow):
                     font-size: 14px;
                 }
                 QLineEdit:focus {
-                    border-color: #2980b9;
                     background-color: #fff;
                 }
             """)
             self.inputField.setPlaceholderText("Type your message here...")
             self.inputField.setFont(QFont('SF Pro Text', 12))
-            self.inputField.returnPressed.connect(self.sendMessage)
             input_layout.addWidget(self.inputField)
             
             self.sendButton = QPushButton('Send')
@@ -898,34 +930,6 @@ class ChatbotApp(QMainWindow):
             self.move(qr.topLeft())
         except Exception as e:
             logging.error(f"Error centering window: {str(e)}")
-
-    def change_model(self):
-        try:
-            self.llm = ChatOllama(
-                model=SETTINGS['model'],
-                temperature=SETTINGS['temperature'],
-                num_ctx=SETTINGS['num_ctx'],
-                num_gpu=SETTINGS['num_gpu'],
-                num_thread=SETTINGS['num_thread'],
-                top_k=SETTINGS['top_k'],
-                top_p=SETTINGS['top_p'],
-                repeat_penalty=SETTINGS['repeat_penalty'],
-                repeat_last_n=SETTINGS['repeat_last_n'],
-                seed=SETTINGS['seed'],
-                mirostat=SETTINGS['mirostat'],
-                mirostat_tau=SETTINGS['mirostat_tau'],
-                mirostat_eta=SETTINGS['mirostat_eta'],
-                f16_kv=SETTINGS['f16_kv'],
-                logits_all=SETTINGS['logits_all'],
-                vocab_only=SETTINGS['vocab_only'],
-                streaming=True,
-                callbacks=[self.stream_handler],
-            )
-            self.add_system_message(f"The {SETTINGS['model']} model is loaded")
-        except Exception as e:
-            logging.error(f"Error changing model: {str(e)}")
-            QMessageBox.critical(self, "Error", f"Failed to change model: {str(e)}")
-            self.llm = None
 
     def add_system_message(self, message):
         try:
@@ -1068,8 +1072,9 @@ class ChatbotApp(QMainWindow):
             container = QWidget()
             container.setLayout(hbox)
             
-            # Set a fixed height for the container to reduce vertical spacing
-            container.setFixedHeight(msg_widget.sizeHint().height() + 5)  # Add a small 5px buffer
+            # Set the container height based on the text size
+            container.setMinimumHeight(msg_widget.sizeHint().height())
+            container.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
             
             # Add the container to the chat layout
             self.chat_layout.addWidget(container)
@@ -1084,6 +1089,13 @@ class ChatbotApp(QMainWindow):
 
             # Scroll to the bottom
             self.chat_area.verticalScrollBar().setValue(self.chat_area.verticalScrollBar().maximum())
+
+            # Adjust font size
+            msg_widget.text.setStyleSheet(f"font-size: {SETTINGS['font_size']}px;")
+
+            # Update the system message
+            self.add_system_message(f"Message added successfully. Using model: {SETTINGS['model']}")
+
         except Exception as e:
             logging.error(f"Error adding message: {str(e)}")
             QMessageBox.critical(self, "Error", f"Failed to add message: {str(e)}")
@@ -1109,7 +1121,7 @@ class ChatbotApp(QMainWindow):
 
     def sendMessage(self):
         try:
-            userMessage = self.inputField.text().strip()
+            userMessage = self.inputField.toMarkdown().strip()
             if not userMessage:
                 return
 
@@ -1352,7 +1364,7 @@ class ChatbotApp(QMainWindow):
                 QLineEdit, QTextEdit {
                     background-color: #34495e;
                     color: #ecf0f1;
-                    border: 1px solid #7f8c8d;
+                    border: none;
                     border-radius: 5px;
                     padding: 5px;
                 }
@@ -1367,7 +1379,7 @@ class ChatbotApp(QMainWindow):
                     background-color: #2980b9;
                 }
                 QScrollArea {
-                    border: 1px solid #7f8c8d;
+                    border: none;
                 }
                 QMenuBar {
                     background-color: #34495e;
@@ -1398,7 +1410,7 @@ class ChatbotApp(QMainWindow):
                 QLineEdit, QTextEdit {
                     background-color: white;
                     color: #2c3e50;
-                    border: 1px solid #bdc3c7;
+                    border: none;
                     border-radius: 5px;
                     padding: 5px;
                 }
@@ -1413,7 +1425,7 @@ class ChatbotApp(QMainWindow):
                     background-color: #2980b9;
                 }
                 QScrollArea {
-                    border: 1px solid #bdc3c7;
+                    border: none;
                 }
                 QMenuBar {
                     background-color: #3498db;
@@ -1462,6 +1474,50 @@ class ChatbotApp(QMainWindow):
             
             dialog = QDialog(self)
             dialog.setWindowTitle("Change Model")
+            dialog.setStyleSheet("""
+                QDialog {
+                    background-color: #f0f0f0;
+                    border-radius: 10px;
+                }
+                QComboBox {
+                    background-color: white;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                    padding: 5px;
+                    min-width: 200px;
+                }
+                QComboBox::drop-down {
+                    border: none;
+                }
+                QComboBox::down-arrow {
+                    image: url(down_arrow.png);
+                    width: 14px;
+                    height: 14px;
+                }
+                QCheckBox {
+                    spacing: 5px;
+                }
+                QCheckBox::indicator {
+                    width: 18px;
+                    height: 18px;
+                }
+                QLineEdit {
+                    background-color: white;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                    padding: 5px;
+                }
+                QPushButton {
+                    background-color: #3498db;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    padding: 8px 15px;
+                }
+                QPushButton:hover {
+                    background-color: #2980b9;
+                }
+            """)
             layout = QVBoxLayout(dialog)
 
             model_combo = QComboBox()
