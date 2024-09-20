@@ -55,18 +55,21 @@ For more information, visit the [Ollama GitHub repository](https://github.com/ol
 ## Screenshots
 
 ### Chat Interface
-![{CB618BC4-3FCD-4408-8DEE-98F5BD2C5E10}](https://github.com/user-attachments/assets/8240ba1b-fc8e-48ec-9913-d9e760237786)
+![image](https://github.com/user-attachments/assets/e0a1975e-b487-482a-a100-675dd635b5bf)
+
 
 ### Model Selection
-![{2C654694-176D-4D85-AE99-0C8F9B25BECB}](https://github.com/user-attachments/assets/6d8079d3-4e4c-4853-a00f-2e9cda9dd4a0)
+![image](https://github.com/user-attachments/assets/f4650745-122a-4f48-b82b-857cdc7a60a2)
+![image](https://github.com/user-attachments/assets/07e00789-058c-4e1b-9b18-d4c7a1e3b150)
+
 
 ### Settings
-![{CF3A2D08-B3A9-474B-8A76-46F555AD107B}](https://github.com/user-attachments/assets/04511e18-6ddf-4d8f-aa29-122c9f709811)
-![{330FF573-5D30-4142-B9E7-E1EBBFD0F9F3}](https://github.com/user-attachments/assets/ac2d5e10-7482-4e54-85e8-2ab4dafb3d97)
+![image](https://github.com/user-attachments/assets/e8724c06-89ef-44be-bd29-6ecbafe53667)
+
 
 
 ### Dark Mode
-![{D83FBB3F-D597-4638-BF87-C9ADC535BF21}](https://github.com/user-attachments/assets/a8677925-02e0-4169-b66d-44b4782fc246)
+![image](https://github.com/user-attachments/assets/2bbdac12-f253-4fc8-b7cf-7f62918fc4ee)
 
 
 ## Configuration
