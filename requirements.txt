@@ -1,6 +1,8 @@
 PyQt5
 langchain
 langchain-community
-psutil
+wmi
 GPUtil
 setuptools
+appdirs
+winreg
