@@ -1,0 +1,165 @@
+/* Dark Mode QSS */
+
+/* General Widget Styles */
+QWidget {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+}
+
+/* LineEdit and TextEdit Styles */
+QLineEdit, QTextEdit {
+    background-color: #34495e;
+    color: #ecf0f1;
+    border: none;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+/* QPushButton Styles */
+QPushButton {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 15px;
+}
+QPushButton:hover {
+    background-color: #2980b9;
+}
+
+/* QScrollArea Styles */
+QScrollArea {
+    border: none;
+}
+
+/* QMenuBar Styles */
+QMenuBar {
+    background-color: #34495e;
+    color: #ecf0f1;
+}
+QMenuBar::item:selected {
+    background-color: #2980b9;
+}
+
+/* QMenu Styles */
+QMenu {
+    background-color: #34495e;
+    color: #ecf0f1;
+}
+QMenu::item:selected {
+    background-color: #2980b9;
+}
+
+/* Custom Styles for Specific Widgets */
+QPushButton#new_chat_button {
+    background-color: #2ecc71;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+}
+QPushButton#new_chat_button:hover {
+    background-color: #27ae60;
+}
+QPushButton#new_chat_button:pressed {
+    background-color: #229954;
+}
+
+QLabel#systemMessageLabel {
+    color: #555;
+    font-style: italic;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+}
+
+QScrollArea {
+    border-radius: 10px;
+    background-color: #f9f9f9;
+}
+QScrollBar:vertical {
+    border: none;
+    background: #f0f0f0;
+    width: 10px;
+    margin: 0px 0px 0px 0px;
+}
+QScrollBar::handle:vertical {
+    background: #888;
+    min-height: 20px;
+    border-radius: 5px;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QLineEdit#inputField {
+    border-radius: 10px;
+    padding: 5px 10px;
+    background-color: #34495e;
+    color: #ecf0f1;
+    font-size: 14px;
+}
+QLineEdit#inputField:focus {
+    background-color: #fff;
+}
+
+QPushButton#sendButton {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: bold;
+}
+QPushButton#sendButton:hover {
+    background-color: #2980b9;
+}
+QPushButton#sendButton:pressed {
+    background-color: #2573a7;
+}
+
+QDialog {
+    background-color: #2c3e50;
+    border-radius: 10px;
+}
+QComboBox {
+    background-color: #34495e;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px;
+    min-width: 200px;
+}
+QComboBox::drop-down {
+    border: none;
+}
+QComboBox::down-arrow {
+    image: url(down_arrow.png);
+    width: 14px;
+    height: 14px;
+}
+QCheckBox {
+    spacing: 5px;
+}
+QCheckBox::indicator {
+    width: 18px;
+    height: 18px;
+}
+QLineEdit {
+    background-color: #34495e;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px;
+}
+QPushButton {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 15px;
+}
+QPushButton:hover {
+    background-color: #2980b9;
+}

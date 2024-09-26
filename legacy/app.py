@@ -14,6 +14,8 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.memory import ConversationBufferMemory, ConversationBufferWindowMemory, ConversationSummaryMemory
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
+from views.main_window_ui import Ui_MainWindow
+
 import os
 import json
 import appdirs
@@ -1557,7 +1559,7 @@ class ChatbotApp(QMainWindow):
 
     def show_about(self):
         QMessageBox.about(self, "About Ollama Chatbot", 
-                          "Ollama Chatbot v2.2\n\n"
+                          "Ollama Chatbot v0.2\n\n"
                           "A simple chatbot interface for Ollama models.\n"
                           "Created using PyQt5 and LangChain.\n\n"
                           "© 2024 github.com/mshojaei77")

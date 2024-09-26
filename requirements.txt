@@ -6,3 +6,5 @@ GPUtil
 setuptools
 appdirs
 winreg
+pynvml
+pyamdgpuinfo

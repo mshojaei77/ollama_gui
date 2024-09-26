@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SystemInfoDialog</class>
+ <widget class="QDialog" name="SystemInfoDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1093</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>LLM System Requirements</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>path/to/icon.png</normaloff>path/to/icon.png</iconset>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="llmSizeTab">
+      <attribute name="title">
+       <string>Max LLM Size</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="llmSizeTabLayout">
+       <item>
+        <widget class="QLabel" name="llmSizeTitle">
+         <property name="text">
+          <string>Maximum LLM Size</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="llmSizeContent">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="gpuTab">
+      <attribute name="title">
+       <string>GPU &amp; VRAM</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="gpuTabLayout">
+       <item>
+        <widget class="QLabel" name="gpuTitle">
+         <property name="text">
+          <string>GPU Information for LLMs</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="gpuContent">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="vramTitle">
+         <property name="text">
+          <string>VRAM Information</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="vramContent">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="cpuTab">
+      <attribute name="title">
+       <string>CPU &amp; RAM</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="cpuTabLayout">
+       <item>
+        <widget class="QLabel" name="cpuTitle">
+         <property name="text">
+          <string>CPU Information for LLMs</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="cpuContent">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="ramTitle">
+         <property name="text">
+          <string>RAM Information</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="ramContent">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="closeButton">
+     <property name="text">
+      <string>Close</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
