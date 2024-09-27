@@ -41,7 +41,6 @@ QListWidget#chatListWidget::item {
     border-radius: 10px;
     margin-bottom: 5px;
     color: #333333;
-    transition: background-color 0.2s ease;
 }
 
 QListWidget#chatListWidget::item:hover {
@@ -76,17 +75,23 @@ QTextEdit#inputField {
 
 /* Send Button Styles */
 QPushButton#sendButton {
-    background-color: #007aff;
+    background-color: #4CAF50;
     color: white;
     border: none;
-    border-radius: 15px;
-    padding: 10px;
+    border-radius: 20px;
+    padding: 12px;
     font-size: 16px;
     font-weight: bold;
+    qproperty-icon: url(assets/send-62.svg);
+    qproperty-iconSize: 22px 22px;
 }
 
 QPushButton#sendButton:hover {
-    background-color: #0056b3;
+    background-color: #45a049;
+}
+
+QPushButton#sendButton:pressed {
+    background-color: #3d8b40;
 }
 
 /* New Chat Button Styles */
@@ -212,4 +217,184 @@ QLabel#systemMessageLabel {
     background-color: #f9f9f9;
     border-radius: 10px;
     font-size: 13px;
+}
+
+/* Message Widget Styles */
+QTextEdit#messageText {
+    border: none;
+    border-radius: 18px;
+    padding: 15px 20px;
+    color: #333333;
+}
+
+QTextEdit#messageText[is_user="true"] {
+    background-color: #F0F8FF;
+}
+
+QTextEdit#messageText[is_user="false"] {
+    background-color: #D8E4FF;
+}
+
+QPushButton#editButton {
+    background-color: transparent;
+    border: none;
+    border-radius: 15px;
+    padding: 5px;
+}
+
+QPushButton#editButton:hover {
+    background-color: rgba(135, 206, 250, 0.3);
+}
+
+QPushButton#editButton:pressed {
+    background-color: rgba(135, 206, 250, 0.5);
+}
+
+QPushButton#editButton[mode="save"] {
+    background-color: transparent;
+}
+
+QPushButton#editButton[mode="save"]:hover {
+    background-color: rgba(152, 251, 152, 0.3);
+}
+
+QPushButton#editButton[mode="save"]:pressed {
+    background-color: rgba(152, 251, 152, 0.5);
+}
+
+/* Settings Dialog Styles */
+QDialog#SettingsDialog {
+    background-color: #f5f5f5;
+    color: #333333;
+}
+
+QTabWidget::pane {
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    border-radius: 5px;
+}
+
+QTabBar::tab {
+    background-color: #f0f0f0;
+    color: #666666;
+    padding: 8px 12px;
+    margin-right: 2px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+QTabBar::tab:selected {
+    background-color: #ffffff;
+    color: #333333;
+    border-bottom: 2px solid #007aff;
+}
+
+QTabBar::tab:hover:!selected {
+    background-color: #e6e6e6;
+}
+
+QLabel {
+    color: #333333;
+}
+
+QSpinBox, QDoubleSpinBox, QLineEdit, QTextEdit, QComboBox {
+    background-color: #ffffff;
+    color: #333333;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    padding: 4px;
+}
+
+QSpinBox:hover, QDoubleSpinBox:hover, QLineEdit:hover, QTextEdit:hover, QComboBox:hover {
+    border-color: #b3b3b3;
+}
+
+QSpinBox:focus, QDoubleSpinBox:focus, QLineEdit:focus, QTextEdit:focus, QComboBox:focus {
+    border-color: #007aff;
+}
+
+QCheckBox {
+    color: #333333;
+}
+
+QCheckBox::indicator {
+    width: 18px;
+    height: 18px;
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+}
+
+QCheckBox::indicator:checked {
+    background-color: #007aff;
+    border-color: #007aff;
+}
+
+QPushButton#save_button {
+    background-color: #007aff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: bold;
+}
+
+QPushButton#save_button:hover {
+    background-color: #0056b3;
+}
+
+QPushButton#save_button:pressed {
+    background-color: #003d82;
+}
+
+/* System Info Dialog Styles */
+QDialog#SystemInfoDialog {
+    background-color: #f5f5f5;
+    color: #333333;
+}
+
+QTabWidget::pane {
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    border-radius: 5px;
+}
+
+QTabBar::tab {
+    background-color: #f0f0f0;
+    color: #666666;
+    padding: 8px 12px;
+    margin-right: 2px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+QTabBar::tab:selected {
+    background-color: #ffffff;
+    color: #333333;
+    border-bottom: 2px solid #007aff;
+}
+
+QTabBar::tab:hover:!selected {
+    background-color: #e6e6e6;
+}
+
+QLabel {
+    color: #333333;
+}
+
+QPushButton#closeButton {
+    background-color: #007aff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: bold;
+}
+
+QPushButton#closeButton:hover {
+    background-color: #0056b3;
+}
+
+QPushButton#closeButton:pressed {
+    background-color: #003d82;
 }

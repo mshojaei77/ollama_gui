@@ -2,7 +2,7 @@ import logging
 import uuid
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QTextEdit, QPushButton, QSizePolicy, QMessageBox, QFrame
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QIcon
 from logger import app_logger  # Importing the logger
 
 class MessageWidget(QWidget):
@@ -48,42 +48,19 @@ class MessageWidget(QWidget):
         
         self.text.document().contentsChanged.connect(self.adjust_size)
 
-        # $ Text Edit Stylesheet
-        self.text.setStyleSheet(f"""
-            QTextEdit {{
-                background-color: {'#F0F8FF' if self.is_user else '#D8E4FF'};
-                border: none;
-                border-radius: 18px;
-                padding: 15px 20px;
-                color: #333333;
-            }}
-        """)
+        # Set object name for styling
+        self.text.setObjectName("messageText")
+        self.text.setProperty("is_user", str(self.is_user).lower())
 
     def create_edit_button(self):
         # $ Edit Button UI Element
-        self.edit_button = QPushButton("Edit")
-        self.edit_button.setFixedSize(70, 30)
+        self.edit_button = QPushButton()
+        self.edit_button.setIcon(QIcon("assets/pencil-50.svg"))
+        self.edit_button.setFixedSize(30, 30)
         self.edit_button.clicked.connect(self.toggle_edit_mode)
         
-        # $ Edit Button Stylesheet
-        self.edit_button.setStyleSheet("""
-            QPushButton {
-                background-color: #87CEFA;
-                color: #333333;
-                border: none;
-                border-radius: 15px;
-                padding: 5px 10px;
-                font-family: 'SF Pro Text';
-                font-size: 13px;
-                font-weight: 500;
-            }
-            QPushButton:hover {
-                background-color: #6495ED;
-            }
-            QPushButton:pressed {
-                background-color: #4169E1;
-            }
-        """)
+        # Set object name for styling
+        self.edit_button.setObjectName("editButton")
 
     def arrange_ui_elements(self, container):
         if self.is_user:
@@ -132,52 +109,16 @@ class MessageWidget(QWidget):
     def enable_edit_mode(self):
         self.is_editing = True
         self.text.setReadOnly(False)
-        self.edit_button.setText("Save")
-        # $ Edit Button Stylesheet (Save mode)
-        self.edit_button.setStyleSheet("""
-            QPushButton {
-                background-color: #98FB98;
-                color: #333333;
-                border: none;
-                border-radius: 15px;
-                padding: 5px 10px;
-                font-family: 'SF Pro Text';
-                font-size: 13px;
-                font-weight: 500;
-            }
-            QPushButton:hover {
-                background-color: #90EE90;
-            }
-            QPushButton:pressed {
-                background-color: #3CB371;
-            }
-        """)
+        self.edit_button.setIcon(QIcon("assets/check-50.svg"))
+        self.edit_button.setProperty("mode", "save")
 
     def save_edit_mode(self):
         new_content = self.text.toPlainText().strip()
         if new_content:
             self.is_editing = False
             self.text.setReadOnly(True)
-            self.edit_button.setText("Edit")
-            # $ Edit Button Stylesheet (Edit mode)
-            self.edit_button.setStyleSheet("""
-                QPushButton {
-                    background-color: #87CEFA;
-                    color: #333333;
-                    border: none;
-                    border-radius: 15px;
-                    padding: 5px 10px;
-                    font-family: 'SF Pro Text';
-                    font-size: 13px;
-                    font-weight: 500;
-                }
-                QPushButton:hover {
-                    background-color: #6495ED;
-                }
-                QPushButton:pressed {
-                    background-color: #4169E1;
-                }
-            """)
+            self.edit_button.setIcon(QIcon("assets/pencil-50.svg"))
+            self.edit_button.setProperty("mode", "edit")
             if self.chat_app:
                 self.chat_app.update_message(self.message_id, new_content)
         else:

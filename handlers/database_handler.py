@@ -1,8 +1,7 @@
 import sqlite3
 import json
-from datetime import datetime
 from langchain_core.messages import HumanMessage, AIMessage
-
+from logger import app_logger
 class DatabaseHandler:
     def __init__(self, db_path='chat_history.db'):
         self.conn = sqlite3.connect(db_path)
@@ -44,8 +43,14 @@ class DatabaseHandler:
         cursor = self.conn.cursor()
         cursor.execute('SELECT title FROM chats WHERE id = ?', (chat_id,))
         title = cursor.fetchone()[0]
-        cursor.execute('SELECT content, is_user FROM messages WHERE chat_id = ? ORDER BY timestamp', (chat_id,))
-        messages = [HumanMessage(content=row[0]) if row[1] else AIMessage(content=row[0]) for row in cursor.fetchall()]
+        cursor.execute('SELECT DISTINCT content, is_user FROM messages WHERE chat_id = ? ORDER BY timestamp', (chat_id,))
+        messages = []
+        seen = set()
+        for row in cursor.fetchall():
+            content = row[0]
+            if content not in seen:
+                seen.add(content)
+                messages.append(HumanMessage(content=content) if row[1] else AIMessage(content=content))
         return title, messages
 
     def get_chat_list(self):
@@ -68,6 +73,12 @@ class DatabaseHandler:
         cursor = self.conn.cursor()
         cursor.execute('DELETE FROM messages WHERE chat_id = ?', (chat_id,))
         cursor.execute('DELETE FROM chats WHERE id = ?', (chat_id,))
+        self.conn.commit()
+
+    def clear_all_chats(self):
+        cursor = self.conn.cursor()
+        cursor.execute('DELETE FROM messages')
+        cursor.execute('DELETE FROM chats')
         self.conn.commit()
 
     def close(self):

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1115</width>
-    <height>833</height>
+    <width>1129</width>
+    <height>785</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,21 +15,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
-    <property name="spacing">
-     <number>0</number>
-    </property>
-    <property name="leftMargin">
-     <number>0</number>
-    </property>
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <property name="rightMargin">
-     <number>0</number>
-    </property>
-    <property name="bottomMargin">
-     <number>0</number>
-    </property>
     <item>
      <widget class="QWidget" name="sidebarWidget" native="true">
       <property name="minimumSize">
@@ -82,6 +67,15 @@
         <widget class="QListWidget" name="chatListWidget">
          <property name="styleSheet">
           <string notr="true">QListWidget::item { padding: 10px; }</string>
+         </property>
+         <property name="autoScroll">
+          <bool>false</bool>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+         <property name="sortingEnabled">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -167,8 +161,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>823</width>
-           <height>621</height>
+           <width>813</width>
+           <height>555</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="chatLayout">
@@ -216,7 +210,7 @@
            </font>
           </property>
           <property name="placeholderText">
-           <string>Message ChatGPT</string>
+           <string>Message Ollama</string>
           </property>
          </widget>
         </item>
@@ -242,7 +236,7 @@
            </font>
           </property>
           <property name="text">
-           <string>▶</string>
+           <string/>
           </property>
          </widget>
         </item>
@@ -275,7 +269,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1115</width>
+     <width>1129</width>
      <height>21</height>
     </rect>
    </property>
@@ -283,8 +277,7 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionSaveChat"/>
-    <addaction name="actionLoadChat"/>
+    <addaction name="actionClear_Chat_History"/>
     <addaction name="actionExportChat"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -388,6 +381,11 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionClear_Chat_History">
+   <property name="text">
+    <string>Clear Chat History</string>
    </property>
   </action>
  </widget>

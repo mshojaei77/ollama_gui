@@ -13,16 +13,9 @@ class SystemInfoDialog(QDialog, Ui_SystemInfoDialog):
         super().__init__(parent)
         self.setupUi(self)
         self.setWindowIcon(QIcon("path/to/icon.png"))
-        self.loadStyleSheet()
         self.total_gpu_vram = 0
         self.initUI()
 
-    def loadStyleSheet(self):
-        try:
-            with open("styles/system_info_dialog.qss", "r") as f:
-                self.setStyleSheet(f.read())
-        except Exception as e:
-            app_logger.error(f"Error loading stylesheet: {str(e)}")
 
     def initUI(self):
         try:
@@ -149,9 +142,7 @@ class SystemInfoDialog(QDialog, Ui_SystemInfoDialog):
             <div>
                 <h3>📊 What This Means For You</h3>
                 <p>🎉 Fantastic news! Your system has the potential to handle AI models with up to {max_llm_size_billion} billion parameters. That's truly remarkable!</p>
-                <div style="background-color: #fef9e7; border-left: 5px solid #f39c12; padding: 10px; margin-top: 20px;">
-                    <p><strong>💡 Expert Insight:</strong> We've incorporated a buffer in our calculations to ensure optimal performance. Your actual AI capabilities may fluctuate based on your specific hardware configuration and current system load.</p>
-                </div>
+                <p><strong>💡 Expert Insight:</strong> We've incorporated a buffer in our calculations to ensure optimal performance. Your actual AI capabilities may fluctuate based on your specific hardware configuration and current system load.</p>
             </div>
             """
 
