@@ -53,24 +53,12 @@ For more information, visit the [Ollama GitHub repository](https://github.com/ol
 4. Start chatting by typing your message in the input field and pressing Enter or clicking "Send".
 
 ## Screenshots
-
-### Chat Interface
-![image](https://github.com/user-attachments/assets/e0a1975e-b487-482a-a100-675dd635b5bf)
-
-
-### Model Selection
-![image](https://github.com/user-attachments/assets/f4650745-122a-4f48-b82b-857cdc7a60a2)
-![image](https://github.com/user-attachments/assets/07e00789-058c-4e1b-9b18-d4c7a1e3b150)
-
-
-### Settings
-![image](https://github.com/user-attachments/assets/e8724c06-89ef-44be-bd29-6ecbafe53667)
-
-
-
-### Dark Mode
-![image](https://github.com/user-attachments/assets/2bbdac12-f253-4fc8-b7cf-7f62918fc4ee)
-
+![image](https://github.com/user-attachments/assets/eaad3a03-b107-468c-adac-9754d55fda67)
+![image](https://github.com/user-attachments/assets/a25d773c-747c-4a66-b77f-fc8cbe6cff63)
+![image](https://github.com/user-attachments/assets/2ea3aaf6-8960-460a-9361-d8a06621c800)
+![image](https://github.com/user-attachments/assets/4a39f4d4-5fde-437d-9deb-2515033f3d03)
+![image](https://github.com/user-attachments/assets/8d38ada1-94d2-4dec-885f-cdafa98b98a4)
+![image](https://github.com/user-attachments/assets/5ab4891f-eb4e-459f-959b-46049eb65a4d)
 
 ## Configuration
 
