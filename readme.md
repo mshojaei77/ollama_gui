@@ -1,5 +1,8 @@
 # Ollama GUI for Windows
 
+⚠️ This Project isn't under active deployment and probably wouldn't support new models
+💡 Soon I will publish another GUI for ollama but this time it would be with Streamlit and will support RAG and Tool Use (with MCP)
+
 Ollama Chatbot is a powerful and user-friendly Windows desktop application that enables seamless interaction with various AI language models using the Ollama backend. This application provides an intuitive interface for chatting with AI models, managing conversations, and customizing settings to suit your needs.
 
 ## Table of Contents
