@@ -86,8 +86,8 @@ class ChatbotApp(QMainWindow):
             # Connect UI elements to their respective handlers
             self.connect_ui_elements()
 
-            # Initialize the model
-            self.model_handler.change_model()
+            # No longer automatically loading the model here
+            # self.model_handler.change_model()
 
             app_logger.info("UI initialized successfully")
         except Exception as e:

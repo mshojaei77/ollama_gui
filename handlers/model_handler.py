@@ -8,48 +8,81 @@ import sys
 import subprocess
 from handlers.settings_handler import SETTINGS, save_settings
 from logger import app_logger
+from handlers.get_trending_models import get_ollama_models
 
 class ModelHandler:
     def __init__(self, app):
         self.app = app
-        self.load_models_from_json()
-        self.app.ui.model_selector_lineEdit.setVisible(False)  # Hide lineEdit initially
-        self.set_current_model_from_settings()  # Add this line
-        self.app.ui_handler.add_system_message("Welcome! I'm ready to chat using the default model. You can change the model anytime from the dropdown menu.")
+        self.app.ui.model_selector_lineEdit.setVisible(True)   # Always show lineEdit
+        self.setup_model_list_button()
+        self.setup_model_load_button()
+        self.set_current_model_from_settings(load_model=False)  # Don't load model automatically
+        self.app.ui_handler.add_system_message("Welcome! Enter a model name and click 'Load Model' to start chatting.")
 
-    def load_models_from_json(self):
+    def setup_model_list_button(self):
+        # Use the existing button in the UI
+        self.app.ui.model_list_button.setToolTip("Show list of popular models")
+        self.app.ui.model_list_button.clicked.connect(self.show_popular_models)
+
+    def setup_model_load_button(self):
+        # Connect the model load button
+        self.app.ui.model_load_button.clicked.connect(self.load_selected_model)
+        self.app.ui.model_load_button.setToolTip("Load the selected model")
+
+    def show_popular_models(self):
+        from PyQt5.QtWidgets import QDialog, QVBoxLayout, QListWidget, QListWidgetItem
+        
         try:
+            get_ollama_models()
+            # Load popular models from JSON
             with open('data\\models.json', 'r') as f:
                 models = json.load(f)
-            models.append("MANUAL ENTRY")
-            self.app.ui.model_selector_comboBox.clear()
-            self.app.ui.model_selector_comboBox.addItems(models)
-            self.app.ui.model_selector_comboBox.currentTextChanged.connect(self._on_model_changed)
-            self.app.ui_handler.add_system_message("Available models have been loaded. You can select one from the dropdown menu.")
+                
+            dialog = QDialog(self.app)
+            dialog.setWindowTitle("Popular Models")
+            layout = QVBoxLayout(dialog)
+            
+            list_widget = QListWidget()
+            for model in models:
+                item = QListWidgetItem(model)
+                list_widget.addItem(item)
+                
+            list_widget.itemDoubleClicked.connect(lambda item: self.select_model_from_list(item.text(), dialog))
+            layout.addWidget(list_widget)
+            
+            dialog.setLayout(layout)
+            dialog.resize(300, 400)
+            dialog.exec_()
+        except Exception as e:
+            app_logger.error(f"Error showing popular models: {str(e)}")
+            self.app.ui_handler.add_system_message("Sorry, I couldn't load the list of popular models.")
+            
+    def select_model_from_list(self, model_name, dialog):
+        self.app.ui.model_selector_lineEdit.setText(model_name)
+        SETTINGS['model'] = model_name
+        save_settings(SETTINGS)
+        # Don't load model automatically
+        self.app.ui_handler.add_system_message(f"You've selected the {model_name} model. Click 'Load Model' to start using it.")
+        dialog.close()
+        
+    def load_models_from_json(self):
+        # We're not loading models into comboBox anymore, but we'll keep this to maintain structure
+        try:
+            with open('data\\models.json', 'r') as f:
+                json.load(f)  # Just validate the JSON
+            self.app.ui_handler.add_system_message("You can enter a model name directly or click the list button to see popular options.")
         except Exception as e:
             app_logger.error(f"Error loading models from JSON: {str(e)}")
-            self.app.ui.model_selector_comboBox.addItem("MANUAL ENTRY")
             self.app.ui_handler.add_system_message("Oops! I couldn't load the list of models. You can still enter a model name manually.")
 
-    def set_current_model_from_settings(self):
+    def set_current_model_from_settings(self, load_model=False):
         current_model = SETTINGS['model']
-        index = self.app.ui.model_selector_comboBox.findText(current_model)
-        if index >= 0:
-            self.app.ui.model_selector_comboBox.setCurrentIndex(index)
-            self.app.ui_handler.add_system_message(f"I've set the current model to {current_model}. You're all set to start chatting!")
-        else:
-            self.app.ui.model_selector_comboBox.setCurrentText("MANUAL ENTRY")
-            self.app.ui.model_selector_lineEdit.setText(current_model)
-            self.app.ui.model_selector_lineEdit.setVisible(True)
-            self.app.ui_handler.add_system_message(f"I've set the model to {current_model}. This is a custom entry. You can change it anytime.")
-
-    def _on_model_changed(self, text):
-        self.app.ui.model_selector_lineEdit.setVisible(text == "MANUAL ENTRY")
-        if text != "MANUAL ENTRY":
-            SETTINGS['model'] = text
-            save_settings(SETTINGS)
+        self.app.ui.model_selector_lineEdit.setText(current_model)
+        if load_model:
             self.change_model()
-            self.app.ui_handler.add_system_message(f"You've selected the {text} model. I'm updating my settings now.")
+            self.app.ui_handler.add_system_message(f"I've set the model to {current_model}. You can change it anytime.")
+        else:
+            self.app.ui_handler.add_system_message(f"Model {current_model} is selected. Click 'Load Model' to start using it.")
 
     def change_model(self):
         try:
@@ -90,19 +123,8 @@ class ModelHandler:
     def _handle_model_change_error(self, error):
         error_message = str(error)
         app_logger.error(f"Failed to change model: {error_message}")
-        if "404" in error_message:
-            model_name = SETTINGS['model']
-            self.app.ui_handler.add_system_message(f"Hmm, I couldn't find the {model_name} model. Would you like me to download it for you?")
-            reply = QMessageBox.question(self.app, "Model Not Found", 
-                                         f"The model {model_name} is not found. Do you want to pull it?",
-                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
-            if reply == QMessageBox.Yes:
-                self.pull_model(model_name)
-            else:
-                self.app.ui_handler.add_system_message("No problem! You can choose a different model or try again later.")
-        else:
-            QMessageBox.critical(self.app, "Error", f"Failed to change model: {error_message}")
-            self.app.ui_handler.add_system_message("I'm sorry, but I encountered an error while changing the model. Let's try a different one!")
+        QMessageBox.critical(self.app, "Error", f"Failed to change model: {error_message}")
+        self.app.ui_handler.add_system_message("I'm sorry, but I encountered an error while changing the model. Let's try a different one!")
         self.app.llm = None
 
     def list_models(self):
@@ -139,28 +161,25 @@ class ModelHandler:
 
     def change_model_dialog(self):
         try:
-            selected_model = self._get_selected_model()
+            selected_model = self.app.ui.model_selector_lineEdit.text()
             if selected_model:
                 SETTINGS['model'] = selected_model
-                self.change_model()
                 save_settings(SETTINGS)
-                self.app.ui_handler.add_system_message(f"Great choice! I'm now using the {selected_model} model. Let's start chatting!")
+                # Don't load model automatically
+                self.app.ui_handler.add_system_message(f"Model changed to {selected_model}. Click 'Load Model' to start using it.")
             else:
                 self._show_model_selection_warning()
         except Exception as e:
             self._handle_model_change_error(e)
 
     def _get_selected_model(self):
-        if self.app.ui.model_selector_comboBox.currentText() == "MANUAL ENTRY":
-            return self.app.ui.model_selector_lineEdit.text()
-        else:
-            return self.app.ui.model_selector_comboBox.currentText()
+        return self.app.ui.model_selector_lineEdit.text()
 
     def _show_model_selection_warning(self):
-        warning_message = "Please select or enter a model name."
+        warning_message = "Please enter a model name."
         app_logger.warning(warning_message)
         QMessageBox.warning(self.app, "Warning", warning_message)
-        self.app.ui_handler.add_system_message("Oops! You forgot to select a model. Please choose one from the dropdown or enter a name.")
+        self.app.ui_handler.add_system_message("Oops! You forgot to enter a model name. Please enter a model name.")
 
     def pull_model(self, model_name):
         try:
@@ -181,3 +200,42 @@ class ModelHandler:
             app_logger.error(error_message)
             QMessageBox.critical(self.app, "Error", error_message)
             self.app.ui_handler.add_system_message(f"I'm sorry, but I couldn't download the {model_name} model. There might be a problem with your internet connection or Ollama setup.")
+
+    def load_selected_model(self):
+        try:
+            selected_model = self.app.ui.model_selector_lineEdit.text()
+            if not selected_model:
+                self._show_model_selection_warning()
+                return
+
+            # Check if model exists locally
+            try:
+                ollama_path = Utility.find_ollama_executable()
+                result = subprocess.run([ollama_path, 'show', selected_model], 
+                                      capture_output=True, text=True, timeout=10)
+                if "not found" in result.stderr:
+                    raise RuntimeError(f"Model {selected_model} not found")
+            except Exception as e:
+                self._handle_missing_model(selected_model, e)
+                return
+
+            # If model exists, load it
+            SETTINGS['model'] = selected_model
+            save_settings(SETTINGS)
+            self.change_model()
+            self.app.ui_handler.add_system_message(f"Great! I'm now using the {selected_model} model. Let's start chatting!")
+
+        except Exception as e:
+            self._handle_model_change_error(e)
+
+    def _handle_missing_model(self, model_name, error):
+        app_logger.error(f"Model not found: {str(error)}")
+        self.app.ui_handler.add_system_message(f"Hmm, I couldn't find the {model_name} model. Would you like me to download it for you?")
+        
+        reply = QMessageBox.question(self.app, "Model Not Found", 
+                                   f"The model {model_name} is not installed. Do you want to download it?",
+                                   QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        if reply == QMessageBox.Yes:
+            self.pull_model(model_name)
+        else:
+            self.app.ui_handler.add_system_message("No problem! You can choose a different model or try again later.")

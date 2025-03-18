@@ -105,12 +105,15 @@
          <number>15</number>
         </property>
         <item>
-         <widget class="QComboBox" name="model_selector_comboBox">
-          <property name="minimumSize">
-           <size>
-            <width>150</width>
-            <height>30</height>
-           </size>
+         <widget class="QPushButton" name="model_list_button">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Trending Models</string>
           </property>
          </widget>
         </item>
@@ -131,17 +134,35 @@
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+         <widget class="QPushButton" name="model_load_button">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
+          <property name="text">
+           <string>load</string>
           </property>
-         </spacer>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="systemMessageLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -162,7 +183,7 @@
            <x>0</x>
            <y>0</y>
            <width>813</width>
-           <height>555</height>
+           <height>586</height>
           </rect>
          </property>
          <layout class="QVBoxLayout" name="chatLayout">
@@ -241,24 +262,6 @@
          </widget>
         </item>
        </layout>
-      </item>
-      <item>
-       <widget class="QLabel" name="systemMessageLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
       </item>
      </layout>
     </item>
