@@ -104,7 +104,6 @@ class ChatbotApp(QMainWindow):
         self.ui.actionExportChat.triggered.connect(self.chat_handler.export_chat)
         self.ui.actionClearChat.triggered.connect(self.chat_handler.clear_chat)
         self.ui.actionToggleDarkMode.triggered.connect(self.settings_handler.toggle_dark_mode)
-        self.ui.actionChangeModel.triggered.connect(self.model_handler.change_model_dialog)
         self.ui.actionShowAvailableModels.triggered.connect(self.model_handler.list_models)
         self.ui.actionOpenSettings.triggered.connect(self.settings_handler.open_settings)
         self.ui.actionShowSystemInfo.triggered.connect(self.ui_handler.show_system_info)
