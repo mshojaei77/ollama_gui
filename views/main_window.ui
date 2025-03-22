@@ -288,7 +288,6 @@
      <string>Edit</string>
     </property>
     <addaction name="actionClearChat"/>
-    <addaction name="actionCopyLastMessage"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -346,14 +345,6 @@
   <action name="actionClearChat">
    <property name="text">
     <string>Clear Chat</string>
-   </property>
-  </action>
-  <action name="actionCopyLastMessage">
-   <property name="text">
-    <string>Copy Last Message</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+C</string>
    </property>
   </action>
   <action name="actionToggleDarkMode">

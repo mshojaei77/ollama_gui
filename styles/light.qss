@@ -398,3 +398,22 @@ QPushButton#closeButton:hover {
 QPushButton#closeButton:pressed {
     background-color: #003d82;
 }
+
+/* Model Load and List Button Styles */
+QPushButton#model_load_button, QPushButton#model_list_button {
+    background-color: #007aff;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+QPushButton#model_load_button:hover, QPushButton#model_list_button:hover {
+    background-color: #0056b3;
+}
+
+QPushButton#model_load_button:pressed, QPushButton#model_list_button:pressed {
+    background-color: #003d82;
+}

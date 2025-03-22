@@ -101,17 +101,27 @@ class ChatHandler(QObject):
                 QMessageBox.warning(self.app, "Warning", "Model not loaded. Please check your settings and try again.")
                 return
 
-            self.app.memory_handler.memory.chat_memory.add_user_message(user_message)
+            # Add user message to memory with ID
+            if hasattr(self.app.memory_handler.memory, 'add_user_message'):
+                self.app.memory_handler.memory.add_user_message(user_message, user_message_id)
+            else:
+                self.app.memory_handler.memory.chat_memory.add_user_message(user_message)
             
-            # Prepare and send message to AI
-            formatted_prompt = self.app.prompt_template.format(input=user_message)
-            messages = [HumanMessage(content=formatted_prompt)]
-            messages.extend(self.app.memory_handler.memory.chat_memory.messages)
+            # Get all messages from memory including the one we just added
+            memory_messages = self.app.memory_handler.memory.chat_memory.messages
+            
+            # Create messages array with all memory messages
+            messages = memory_messages.copy()
+            
+            # If there's a prompt template, add it as the first message
+            if hasattr(self.app, 'prompt_template') and self.app.prompt_template:
+                formatted_prompt = self.app.prompt_template.format(input=user_message)
+                messages.insert(0, HumanMessage(content=formatted_prompt))
             
             self.chat_thread = ChatThread(self.app, self.app.llm, messages)
             self.chat_thread.response_ready.connect(self.handle_response)
             self.chat_thread.error_occurred.connect(self.handle_error)
-            self.chat_thread.token_ready.connect(self.update_ai_message)  # Connect to the new signal
+            self.chat_thread.token_ready.connect(self.update_ai_message)
             self.chat_thread.start()
             
             # Prepare UI for AI response
@@ -142,7 +152,14 @@ class ChatHandler(QObject):
             if self.current_ai_message:
                 # Final update to ensure complete message
                 self.current_ai_message.text.setPlainText(response)
-                self.app.memory_handler.memory.chat_memory.add_ai_message(response)
+                
+                # Add AI message to memory with ID
+                ai_message_id = self.current_ai_message.message_id
+                if hasattr(self.app.memory_handler.memory, 'add_ai_message'):
+                    self.app.memory_handler.memory.add_ai_message(response, ai_message_id)
+                else:
+                    self.app.memory_handler.memory.chat_memory.add_ai_message(response)
+                    
                 self.current_ai_message = None
                 self.scroll_to_bottom()
                 self.save_chat()
@@ -355,21 +372,101 @@ class ChatHandler(QObject):
             app_logger.error(f"Error clearing chat: {str(e)}")
             QMessageBox.critical(self.app, "Error", f"Failed to clear chat: {str(e)}")
 
-    def copy_last_message(self):
-        """Copy the last message to clipboard"""
-        try:
-            if self.app.memory_handler.memory.chat_memory.messages:
-                last_message = self.app.memory_handler.memory.chat_memory.messages[-1]
-                clipboard = QApplication.clipboard()
-                clipboard.setText(last_message.content)
-                self.app.ui_handler.add_system_message("The last message has been copied to your clipboard. You can now paste it anywhere you like!")
-        except Exception as e:
-            app_logger.error(f"Error copying last message: {str(e)}")
-            QMessageBox.critical(self.app, "Error", f"Failed to copy last message: {str(e)}")
-
     def scroll_to_bottom(self):
         """Scroll the chat area to the bottom"""
         QApplication.processEvents()
         self.app.ui.chatScrollArea.verticalScrollBar().setValue(
             self.app.ui.chatScrollArea.verticalScrollBar().maximum()
         )
+        
+    def update_message(self, message_id, new_content):
+        """Update a user message in the chat area by its ID and regenerate the AI response."""
+        try:
+            # Find the message widget with the matching ID and update UI
+            message_found = False
+            message_index = -1
+            is_user_message = False
+            
+            for i in range(self.chat_layout.count()):
+                widget = self.chat_layout.itemAt(i).widget()
+                if isinstance(widget, MessageWidget) and widget.message_id == message_id:
+                    # Check if it's a user message (only user messages should be editable)
+                    is_user_message = widget.is_user
+                    if not is_user_message:
+                        app_logger.warning(f"Cannot edit AI message with ID {message_id}")
+                        QMessageBox.warning(self.app, "Warning", "Only user messages can be edited.")
+                        return
+                    
+                    # Update the UI
+                    widget.text.setPlainText(new_content)
+                    message_found = True
+                    message_index = i
+                    break
+            
+            if not message_found:
+                app_logger.warning(f"Message with ID {message_id} not found in UI")
+                return
+            
+            # Find the message in memory and its index
+            memory_index = -1
+            for i, msg in enumerate(self.app.memory_handler.memory.chat_memory.messages):
+                if hasattr(msg, 'id') and msg.id == message_id:
+                    memory_index = i
+                    break
+            
+            if memory_index == -1:
+                app_logger.warning(f"Message {message_id} not found in memory")
+                return
+            
+            # Update the message content in memory
+            if hasattr(self.app.memory_handler.memory, 'edit_message'):
+                self.app.memory_handler.memory.edit_message(message_id, new_content)
+            else:
+                # Fallback: update directly
+                self.app.memory_handler.memory.chat_memory.messages[memory_index].content = new_content
+            
+            # If this is not the last message, remove all subsequent messages
+            if memory_index < len(self.app.memory_handler.memory.chat_memory.messages) - 1:
+                # Keep only messages up to and including the edited message
+                self.app.memory_handler.memory.chat_memory.messages = self.app.memory_handler.memory.chat_memory.messages[:memory_index + 1]
+                
+                # Remove subsequent message widgets from UI
+                while self.chat_layout.count() > message_index + 1:
+                    item = self.chat_layout.takeAt(message_index + 1)
+                    if item and item.widget():
+                        item.widget().deleteLater()
+                    QApplication.processEvents()
+            
+            # Get all messages from memory after the edit
+            memory_messages = self.app.memory_handler.memory.chat_memory.messages
+            
+            # Create messages array with all memory messages
+            messages = memory_messages.copy()
+            
+            # If there's a prompt template, add it as the first message
+            if hasattr(self.app, 'prompt_template') and self.app.prompt_template:
+                formatted_prompt = self.app.prompt_template.format(input=new_content)
+                messages.insert(0, HumanMessage(content=formatted_prompt))
+            
+            # Prepare UI for AI response
+            ai_message_id = uuid.uuid4().hex
+            self.current_ai_message = MessageWidget("", is_user=False, chat_app=self.app, message_id=ai_message_id)
+            self.add_message_widget(self.current_ai_message)
+            self.scroll_to_bottom()
+            
+            # Start a new chat thread to regenerate the AI response
+            self.chat_thread = ChatThread(self.app, self.app.llm, messages)
+            self.chat_thread.response_ready.connect(self.handle_response)
+            self.chat_thread.error_occurred.connect(self.handle_error)
+            self.chat_thread.token_ready.connect(self.update_ai_message)
+            self.chat_thread.start()
+            
+            app_logger.info(f"Regenerating AI response after editing message {message_id}")
+            
+            # Save the updated chat
+            self.save_chat()
+            
+            app_logger.info(f"Message {message_id} updated successfully in UI and memory")
+        except Exception as e:
+            app_logger.error(f"Error updating message: {str(e)}", exc_info=True)
+            QMessageBox.critical(self.app, "Error", f"Failed to update message: {str(e)}")

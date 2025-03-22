@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'e:\ollama_gui\views\settings.ui'
+# Form implementation generated from reading ui file 'd:\PersonalProjects\ollama_gui\views\settings.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.11
 #
@@ -458,7 +458,7 @@ class Ui_SettingsDialog(object):
         self.gridLayout_main.addWidget(self.tabs, 1, 0, 1, 1)
 
         self.retranslateUi(SettingsDialog)
-        self.tabs.setCurrentIndex(3)
+        self.tabs.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(SettingsDialog)
 
     def retranslateUi(self, SettingsDialog):

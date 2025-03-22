@@ -86,8 +86,8 @@ class ChatbotApp(QMainWindow):
             # Connect UI elements to their respective handlers
             self.connect_ui_elements()
 
-            # No longer automatically loading the model here
-            # self.model_handler.change_model()
+            # Initialize the model
+            self.model_handler.change_model()
 
             app_logger.info("UI initialized successfully")
         except Exception as e:
@@ -103,7 +103,6 @@ class ChatbotApp(QMainWindow):
         self.ui.actionClear_Chat_History.triggered.connect(self.chat_handler.clear_chat_list)
         self.ui.actionExportChat.triggered.connect(self.chat_handler.export_chat)
         self.ui.actionClearChat.triggered.connect(self.chat_handler.clear_chat)
-        self.ui.actionCopyLastMessage.triggered.connect(self.chat_handler.copy_last_message)
         self.ui.actionToggleDarkMode.triggered.connect(self.settings_handler.toggle_dark_mode)
         self.ui.actionChangeModel.triggered.connect(self.model_handler.change_model_dialog)
         self.ui.actionShowAvailableModels.triggered.connect(self.model_handler.list_models)
@@ -132,6 +131,21 @@ class ChatbotApp(QMainWindow):
             self.setWindowIcon(QIcon(icon_path))
         else:
             app_logger.warning(f"Icon file not found: {icon_path}")
+
+    def update_message(self, message_id, new_content):
+        """Update a message in the chat history.
+        
+        Args:
+            message_id: The ID of the message to update
+            new_content: The new content for the message
+        """
+        try:
+            # Delegate to chat_handler which should handle the actual update
+            self.chat_handler.update_message(message_id, new_content)
+            app_logger.info(f"Message {message_id} updated successfully")
+        except Exception as e:
+            app_logger.error(f"Error updating message: {str(e)}", exc_info=True)
+            self.show_error_message("Failed to update message", str(e))
 
 def initialize_app():
     """Initialize and run the ChatbotApp."""
